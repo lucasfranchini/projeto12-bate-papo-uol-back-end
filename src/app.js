@@ -23,7 +23,7 @@ setInterval(()=>{
                 to: 'Todos', 
                 text: 'sai da sala...', 
                 type: 'status', 
-                time: now
+                time: dayjs().format('HH:mm:ss')
             })
         }
     });
@@ -32,7 +32,6 @@ setInterval(()=>{
 
 app.post('/participants',(req,res)=>{
     const participant = stripHtml(req.body.name).result;
-    console.log(participant)
     if(participant === ""){
         res.sendStatus(400);
         return
@@ -61,8 +60,10 @@ app.post('/messages',(req,res)=>{
         return
     }
     messages.push({
-        from: user,
-        to,text,type,
+        from: stripHtml(user).result,
+        to:stripHtml(to).result,
+        text:stripHtml(text).result,
+        type:stripHtml(type).result,
         time: dayjs().format('HH:mm:ss') 
     });
     res.sendStatus(200);
