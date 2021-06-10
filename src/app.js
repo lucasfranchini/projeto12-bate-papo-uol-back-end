@@ -31,7 +31,7 @@ setInterval(()=>{
 },15000)
 
 app.post('/participants',(req,res)=>{
-    const participant = stripHtml(req.body.name).result;
+    const participant = stripHtml(req.body.name).result.trim();
     if(participant === ""){
         res.sendStatus(400);
         return
@@ -60,10 +60,10 @@ app.post('/messages',(req,res)=>{
         return
     }
     messages.push({
-        from: stripHtml(user).result,
-        to:stripHtml(to).result,
-        text:stripHtml(text).result,
-        type:stripHtml(type).result,
+        from: stripHtml(user).result.trim(),
+        to:stripHtml(to).result.trim(),
+        text:stripHtml(text).result.trim(),
+        type:stripHtml(type).result.trim(),
         time: dayjs().format('HH:mm:ss') 
     });
     res.sendStatus(200);
