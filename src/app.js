@@ -6,8 +6,28 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const participants = [];
+let participants = [];
 const messages = [];
+
+setInterval(()=>{
+    const now = Date.now();
+    const newparticpants = [];
+    participants.forEach(p=>{
+        if(now-p.lastStatus<10000){
+            newparticpants.push(p);
+        }
+        else{
+            messages.push({
+                from: p.name, 
+                to: 'Todos', 
+                text: 'sai da sala...', 
+                type: 'status', 
+                time: now
+            })
+        }
+    });
+    participants=newparticpants;
+},15000)
 
 app.post('/participants',(req,res)=>{
     const participant = req.body.name;
@@ -60,5 +80,15 @@ app.get('/messages',(req,res)=>{
     sentMessages.reverse();
     res.send(sentMessages);
 });
+
+app.post('/status',(req,res)=>{
+    const user = participants.findIndex(p=>req.headers.user===p.name)
+    if(user===-1){
+        res.sendStatus(400);
+        return;
+    }
+    participants[user].lastStatus= Date.now();
+    res.sendStatus(200);
+})
 
 app.listen(4000,()=>console.log("starting server"));
