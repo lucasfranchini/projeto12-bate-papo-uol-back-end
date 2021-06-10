@@ -38,7 +38,7 @@ app.post('/participants',(req,res)=>{
     participants.push({name:participant,lastStatus:Date.now()});
     messages.push({
         from: participant,
-        to:'todos',
+        to:'Todos',
         text: 'entra na sala...',
         type: 'status',
         time: dayjs().format('HH:mm:ss') 
@@ -73,7 +73,7 @@ app.get('/messages',(req,res)=>{
     }
     const sentMessages=[];
     for(let i = (messages.length-1);sentMessages.length<req.query.limit&&i>=0;i--){
-        if( messages[i].to==='todos'|| messages[i].to===req.headers.user || messages[i].from===req.headers.user){
+        if( messages[i].to==='Todos'|| messages[i].to===req.headers.user || messages[i].from===req.headers.user){
             sentMessages.push(messages[i]);
         }
     }
