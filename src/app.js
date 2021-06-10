@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dayjs from "dayjs";
+import {stripHtml} from "string-strip-html";
 
 const app = express();
 app.use(cors());
@@ -30,7 +31,8 @@ setInterval(()=>{
 },15000)
 
 app.post('/participants',(req,res)=>{
-    const participant = req.body.name;
+    const participant = stripHtml(req.body.name).result;
+    console.log(participant)
     if(participant === ""){
         res.sendStatus(400);
         return
