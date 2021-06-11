@@ -3,13 +3,14 @@ import cors from "cors";
 import dayjs from "dayjs";
 import {stripHtml} from "string-strip-html";
 import Joi from 'joi';
+import fs from 'fs';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-let participants = [];
-const messages = [];
+let participants = fs.existsSync('./data/participants.json') ?  JSON.parse(fs.readFileSync('./data/participants.json')):[];
+const messages = fs.existsSync('./data/messages.json') ?  JSON.parse(fs.readFileSync('./data/messages.json')):[];
 
 setInterval(()=>{
     const now = Date.now();
@@ -28,7 +29,9 @@ setInterval(()=>{
             })
         }
     });
+    fs.writeFileSync('./data/messages.json', JSON.stringify(messages));
     participants=newparticpants;
+    fs.writeFileSync('./data/participants.json', JSON.stringify( participants));
 },15000)
 
 app.post('/participants',(req,res)=>{
@@ -50,6 +53,8 @@ app.post('/participants',(req,res)=>{
         type: 'status',
         time: dayjs().format('HH:mm:ss') 
     });
+    fs.writeFileSync('./data/participants.json', JSON.stringify( participants));
+    fs.writeFileSync('./data/messages.json', JSON.stringify(messages));
     res.sendStatus(200);
 });
 
@@ -80,6 +85,7 @@ app.post('/messages',(req,res)=>{
         type:stripHtml(message.type).result.trim(),
         time: dayjs().format('HH:mm:ss') 
     });
+    fs.writeFileSync('./data/messages.json', JSON.stringify(messages));
     res.sendStatus(200);
 });
 
@@ -89,7 +95,7 @@ app.get('/messages',(req,res)=>{
         return
     }
     const sentMessages=[];
-    for(let i = (messages.length-1);sentMessages.length<req.query.limit&&i>=0;i--){
+    for(let i = (messages.length-1); sentMessages.length<req.query.limit && i>=0 ;i--){
         if( messages[i].to==='Todos'|| messages[i].to===req.headers.user || messages[i].from===req.headers.user){
             sentMessages.push(messages[i]);
         }
