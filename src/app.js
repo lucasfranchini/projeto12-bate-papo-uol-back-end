@@ -74,12 +74,19 @@ app.post('/messages',(req,res)=>{
     
     const user = req.headers.user;
     const participantExist = participants.find(p=>user===p.name);
-    const message = {...req.body,from: participantExist && participantExist.name}
+    const message = {
+        to:stripHtml(req.body.to).result.trim(),
+        text:stripHtml(req.body.text).result.trim(),
+        type:stripHtml(req.body.type).result.trim(),
+        time: dayjs().format('HH:mm:ss') ,
+        from: participantExist && participantExist.name
+    }
     const schema = Joi.object({
         from: Joi.string().required(),
         to: Joi.string().required().min(1),
         text:Joi.string().required().min(1),
-        type:Joi.any().valid('message','private_message'),
+        type:Joi.string().valid('message','private_message'),
+        time: Joi.string()
     });
     
     if(schema.validate(message).error !== undefined){
