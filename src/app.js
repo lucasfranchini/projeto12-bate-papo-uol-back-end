@@ -38,11 +38,19 @@ app.post('/participants',(req,res)=>{
     const participant = stripHtml(req.body.name).result.trim();
     const schema = Joi.object({
         name: Joi.string()
-                .required()
-                .min(1)
+                 .required()
+                 .custom((value)=>{
+                    if(participants.find(p=>p.name===value)===undefined){
+                        return value
+                    }
+                    else{
+                        throw new Error('username alredy exists');
+                    }
+                 })
+                          
     });
     if(schema.validate(req.body).error !==undefined){
-        res.sendStatus(400);
+        res.status(400).send(schema.validate(req.body).error.details[0].message);
         return
     }
     participants.push({name:participant,lastStatus:Date.now()});
@@ -96,7 +104,7 @@ app.get('/messages',(req,res)=>{
     }
     const sentMessages=[];
     for(let i = (messages.length-1); sentMessages.length<req.query.limit && i>=0 ;i--){
-        if( messages[i].to==='Todos'|| messages[i].to===req.headers.user || messages[i].from===req.headers.user){
+        if( messages[i].to==='Todos'|| messages[i].to===req.headers.user || messages[i].from===req.headers.user || messages[i].type==='message'){
             sentMessages.push(messages[i]);
         }
     }
