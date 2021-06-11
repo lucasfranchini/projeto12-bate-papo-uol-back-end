@@ -35,7 +35,7 @@ setInterval(()=>{
 },15000)
 
 app.post('/participants',(req,res)=>{
-    const participant = stripHtml(req.body.name).result.trim();
+    const participant = req.body.name && stripHtml(req.body.name).result.trim();
     const schema = Joi.object({
         name: Joi.string()
                  .required()
