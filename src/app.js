@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dayjs from "dayjs";
 import {stripHtml} from "string-strip-html";
+import Joi from 'joi';
 
 const app = express();
 app.use(cors());
@@ -32,7 +33,12 @@ setInterval(()=>{
 
 app.post('/participants',(req,res)=>{
     const participant = stripHtml(req.body.name).result.trim();
-    if(participant === ""){
+    const schema = Joi.object({
+        name: Joi.string()
+                .required()
+                .min(1)
+    });
+    if(schema.validate(req.body).error !==undefined){
         res.sendStatus(400);
         return
     }
@@ -52,18 +58,26 @@ app.get('/participants',(req,res)=>{
 });
 
 app.post('/messages',(req,res)=>{
-    const {to,text,type} = req.body;
+    
     const user = req.headers.user;
     const participantExist = participants.find(p=>user===p.name);
-    if(to==="" || text==="" || ( type !== 'message' && type !== 'private_message') || participantExist === undefined){
-        res.sendStatus(400);
+    const message = {...req.body,from: participantExist && participantExist.name}
+    const schema = Joi.object({
+        from: Joi.string().required(),
+        to: Joi.string().required().min(1),
+        text:Joi.string().required().min(1),
+        type:Joi.any().valid('message','private_message'),
+    });
+    
+    if(schema.validate(message).error !== undefined){
+        res.status(400).send(schema.validate(message).error.details[0].message)
         return
     }
     messages.push({
-        from: stripHtml(user).result.trim(),
-        to:stripHtml(to).result.trim(),
-        text:stripHtml(text).result.trim(),
-        type:stripHtml(type).result.trim(),
+        from: stripHtml(message.from).result.trim(),
+        to:stripHtml(message.to).result.trim(),
+        text:stripHtml(message.text).result.trim(),
+        type:stripHtml(message.type).result.trim(),
         time: dayjs().format('HH:mm:ss') 
     });
     res.sendStatus(200);
